@@ -21,22 +21,85 @@ FILE_NAME: str = "Enrollments.json"
 
 # Define the Data Variables
 students: list = []  # a table of student data
-menu_choice: str  # Hold the choice made by the user.
+menu_choice: str = ""  # Hold the choice made by the user.
 
 
 # TODO Create a Person Class
-# TODO Add first_name and last_name properties to the constructor (Done)
-# TODO Create a getter and setter for the first_name property (Done)
-# TODO Create a getter and setter for the last_name property (Done)
-# TODO Override the __str__() method to return Person data (Done)
+class Person:
+    """
+    A collection of data about a Person
+    David Levinson, 9/8/2024, Created Class
+    Properties:
+    - first_name (str): The student's first name.
+    - last_name (str): The student's last name.
+    """
 
-# TODO Create a Student class the inherits from the Person class (Done)
-# TODO call to the Person constructor and pass it the first_name and last_name data (Done)
-# TODO add a assignment to the course_name property using the course_name parameter (Done)
-# TODO add the getter for course_name (Done)
-# TODO add the setter for course_name (Done)
-# TODO Override the __str__() method to return the Student data (Done)
+    # TODO Add first_name and last_name properties to the constructor
+    # - - Constructor --
+    def __init__(self, first_name: str, last_name: str):
+        # Use a property to set the attribute
+        self.first_name = first_name
+        self.last_name = last_name
 
+    # TODO Create a getter and setter for the first_name property
+    @property  # (getter or accessor)
+    def first_name(self):
+        return self.__first_name.title()  # Formatting code to Title case
+
+    @first_name.setter
+    def first_name(self, value: str):
+        if value.isalpha() or value == "":  # is character or empty string
+            self.__first_name = value
+        else:
+            raise ValueError("The last name should not contain numbers.")
+
+    # TODO Create a getter and setter for the last_name property
+    @property
+    def last_name(self):
+        return self.__last_name.title()  # formatting code to Title case
+
+    @last_name.setter
+    def last_name(self, value: str):
+        if value.isalpha() or value == "":  # is character or empty string
+            self.__last_name = value
+        else:
+            raise ValueError("The last name should not contain numbers.")
+
+    # TODO Override the __str__() method to return Person data
+    def __str__(self):
+        return f'{self.first_name},{self.last_name}'
+
+
+# TODO Create a Student class the inherits from the Person class
+class Student(Person):
+    """
+    A collection of data about a Student
+    David Levinson, 9/8/2024, Created Class
+    Properties:
+    - first_name (str): The student's first name inherited from the Person class
+    - last_name (str): The student's last name inherited from the Person class
+    - course (str): The course the student is registering/registered for
+    """
+
+    # TODO call to the Person constructor and pass it the first_name and last_name data
+    def __init__(self, first_name: str = '', last_name: str = '', course_name: str = ""):
+        super().__init__(first_name=first_name, last_name=last_name)
+        # TODO add a assignment to the course_name property using the course_name parameter
+        self.course_name = course_name
+
+    # TODO add the getter for course_name
+    @property
+    def course_name(self):
+        return self.__course_name.title  # formatting code to Title case
+
+    # TODO add the setter for course_name
+    @course_name.setter
+    def course_name(self, value: str):
+        self.course_name = value
+
+    # TODO Override the __str__() method to return the Student data
+    def __str__(self):
+        return f'{self.first_name},{self.last_name},{self.course_name}'
 
 
 # Processing --------------------------------------- #
@@ -47,6 +110,7 @@ class FileProcessor:
     ChangeLog: (Who, When, What)
     RRoot,1.1.2030,Created Class
     """
+
     @staticmethod
     def read_data_from_file(file_name: str, student_data: list):
         """ This function reads data from a json file and loads it into a list of dictionary rows
@@ -93,7 +157,7 @@ class FileProcessor:
         except Exception as e:
             message = "Error: There was a problem with writing to the file.\n"
             message += "Please check that the file is not open by another program."
-            IO.output_error_messages(message=message,error=e)
+            IO.output_error_messages(message=message, error=e)
         finally:
             if file.closed == False:
                 file.close()
@@ -154,7 +218,7 @@ class IO:
         choice = "0"
         try:
             choice = input("Enter your menu choice number: ")
-            if choice not in ("1","2","3","4"):  # Note these are strings
+            if choice not in ("1", "2", "3", "4"):  # Note these are strings
                 raise Exception("Please, choose only 1, 2, 3, or 4")
         except Exception as e:
             IO.output_error_messages(e.__str__())  # Not passing e to avoid the technical message
@@ -200,8 +264,8 @@ class IO:
                 raise ValueError("The last name should not contain numbers.")
             course_name = input("Please enter the name of the course: ")
             student = {"FirstName": student_first_name,
-                            "LastName": student_last_name,
-                            "CourseName": course_name}
+                       "LastName": student_last_name,
+                       "CourseName": course_name}
             student_data.append(student)
             print()
             print(f"You have registered {student_first_name} {student_last_name} for {course_name}.")

@@ -28,78 +28,64 @@ menu_choice: str = ""  # Hold the choice made by the user.
 class Person:
     """
     A collection of data about a Person
-    David Levinson, 9/8/2024, Created Class
     Properties:
-    - first_name (str): The student's first name.
-    - last_name (str): The student's last name.
+    - first_name (str): The person's first name.
+    - last_name (str): The person's last name.
     """
 
-    # TODO Add first_name and last_name properties to the constructor
-    # - - Constructor --
-    def __init__(self, first_name: str, last_name: str):
-        # Use a property to set the attribute
+    def __init__(self, first_name: str = "", last_name: str = ""):
         self.first_name = first_name
         self.last_name = last_name
 
-    # TODO Create a getter and setter for the first_name property
-    @property  # (getter or accessor)
+    @property
     def first_name(self):
-        return self.__first_name.title()  # Formatting code to Title case
+        return self.__first_name.title()
 
     @first_name.setter
     def first_name(self, value: str):
-        if value.isalpha() or value == "":  # is character or empty string
+        if value.isalpha() or value == "":
             self.__first_name = value
         else:
-            raise ValueError("The last name should not contain numbers.")
+            raise ValueError("The first name should not contain numbers.")
 
-    # TODO Create a getter and setter for the last_name property
     @property
     def last_name(self):
-        return self.__last_name.title()  # formatting code to Title case
+        return self.__last_name.title()
 
     @last_name.setter
     def last_name(self, value: str):
-        if value.isalpha() or value == "":  # is character or empty string
+        if value.isalpha() or value == "":
             self.__last_name = value
         else:
             raise ValueError("The last name should not contain numbers.")
 
-    # TODO Override the __str__() method to return Person data
     def __str__(self):
-        return f'{self.first_name},{self.last_name}'
+        return f'{self.first_name}, {self.last_name}'
 
 
-# TODO Create a Student class the inherits from the Person class
 class Student(Person):
     """
     A collection of data about a Student
-    David Levinson, 9/8/2024, Created Class
     Properties:
     - first_name (str): The student's first name inherited from the Person class
     - last_name (str): The student's last name inherited from the Person class
-    - course (str): The course the student is registering/registered for
+    - course_name (str): The course the student is registering/registered for
     """
 
-    # TODO call to the Person constructor and pass it the first_name and last_name data
-    def __init__(self, first_name: str = '', last_name: str = '', course_name: str = ""):
+    def __init__(self, first_name: str = '', last_name: str = '', course_name: str = ''):
         super().__init__(first_name=first_name, last_name=last_name)
-        # TODO add a assignment to the course_name property using the course_name parameter
-        self.course_name = course_name
+        self.__course_name = course_name  # Initialize the private variable
 
-    # TODO add the getter for course_name
     @property
     def course_name(self):
-        return self.__course_name.title  # formatting code to Title case
+        return self.__course_name.title()  # Getter with formatting
 
-    # TODO add the setter for course_name
     @course_name.setter
     def course_name(self, value: str):
-        self.course_name = value
+        self.__course_name = value
 
-    # TODO Override the __str__() method to return the Student data
     def __str__(self):
-        return f'{self.first_name},{self.last_name},{self.course_name}'
+        return f"{self.first_name}, {self.last_name}, {self.course_name}"
 
 
 # Processing --------------------------------------- #
@@ -108,7 +94,7 @@ class FileProcessor:
     A collection of processing layer functions that work with Json files
 
     ChangeLog: (Who, When, What)
-    RRoot,1.1.2030,Created Class
+    David Levinson,9/9/2024, Created Class
     """
 
     @staticmethod
@@ -116,7 +102,7 @@ class FileProcessor:
         """ This function reads data from a json file and loads it into a list of dictionary rows
 
         ChangeLog: (Who, When, What)
-        RRoot,1.1.2030,Created function
+        David Levinson, 9/9/2024,Created function
 
         :param file_name: string data with name of file to read from
         :param student_data: list of dictionary rows to be filled with file data
@@ -126,11 +112,18 @@ class FileProcessor:
 
         try:
             file = open(file_name, "r")
-            student_data = json.load(file)
-            file.close()
-        except Exception as e:
-            IO.output_error_messages(message="Error: There was a problem with reading the file.", error=e)
 
+            list_of_dictionary_data = json.load(file)  # the load function returns a list of dictionary rows.
+            for student in list_of_dictionary_data:
+                student_object: Student = Student(first_name=student["FirstName"],
+                                                  last_name= student["LastName"],
+                                                  course_name=student["CourseName"])
+                student_data.append(student_object)
+            file.close()
+        except FileNotFoundError as e:
+            IO.output_error_messages("Text file must exist before running this script!", e)
+        except Exception as e:
+            IO.output_error_messages("There was a non-specific error!", e)
         finally:
             if file.closed == False:
                 file.close()
@@ -141,7 +134,7 @@ class FileProcessor:
         """ This function writes data to a json file with data from a list of dictionary rows
 
         ChangeLog: (Who, When, What)
-        RRoot,1.1.2030,Created function
+        David Levinson,9/9/2024, Created function
 
         :param file_name: string data with name of file to write to
         :param student_data: list of dictionary rows to be writen to the file
@@ -150,14 +143,19 @@ class FileProcessor:
         """
 
         try:
+            list_of_dictionary_data: list = []
+            for student in student_data:
+                student_json: dict \
+                    = {"FirstName": student.first_name, "LastName": student.last_name, "CourseName": student.course_name}
+                list_of_dictionary_data.append(student_json)
+
             file = open(file_name, "w")
-            json.dump(student_data, file)
+            json.dump(list_of_dictionary_data, file)
             file.close()
-            IO.output_student_and_course_names(student_data=student_data)
+        except TypeError as e:
+            IO.output_error_messages("Please check that the data is a valid JSON format", e)
         except Exception as e:
-            message = "Error: There was a problem with writing to the file.\n"
-            message += "Please check that the file is not open by another program."
-            IO.output_error_messages(message=message, error=e)
+            IO.output_error_messages("There was a non-specific error!", e)
         finally:
             if file.closed == False:
                 file.close()
@@ -169,10 +167,7 @@ class IO:
     A collection of presentation layer functions that manage user input and output
 
     ChangeLog: (Who, When, What)
-    RRoot,1.1.2030,Created Class
-    RRoot,1.2.2030,Added menu output and input functions
-    RRoot,1.3.2030,Added a function to display the data
-    RRoot,1.4.2030,Added a function to display custom error messages
+    David Levinson, 9/9/2024, Used starter code and updated class
     """
 
     @staticmethod
@@ -180,7 +175,7 @@ class IO:
         """ This function displays the a custom error messages to the user
 
         ChangeLog: (Who, When, What)
-        RRoot,1.3.2030,Created function
+        David Levinson,9/9/2024,Created function
 
         :param message: string with message data to display
         :param error: Exception object with technical message to display
@@ -197,7 +192,7 @@ class IO:
         """ This function displays the menu of choices to the user
 
         ChangeLog: (Who, When, What)
-        RRoot,1.1.2030,Created function
+        David Levinson,9/9/2024, Created function
 
 
         :return: None
@@ -211,7 +206,7 @@ class IO:
         """ This function gets a menu choice from the user
 
         ChangeLog: (Who, When, What)
-        RRoot,1.1.2030,Created function
+        David Levinson,9/9/2024, Created function
 
         :return: string with the users choice
         """
@@ -230,7 +225,7 @@ class IO:
         """ This function displays the student and course names to the user
 
         ChangeLog: (Who, When, What)
-        RRoot,1.1.2030,Created function
+        David Levinson,9/9/2024, Created function
 
         :param student_data: list of dictionary rows to be displayed
 
@@ -239,8 +234,7 @@ class IO:
 
         print("-" * 50)
         for student in student_data:
-            print(f'Student {student["FirstName"]} '
-                  f'{student["LastName"]} is enrolled in {student["CourseName"]}')
+            print(f"{student.first_name} {student.last_name} is registered for {student.course_name}")
         print("-" * 50)
 
     @staticmethod
@@ -248,7 +242,7 @@ class IO:
         """ This function gets the student's first name and last name, with a course name from the user
 
         ChangeLog: (Who, When, What)
-        RRoot,1.1.2030,Created function
+        David Levinson,9/9/2024,Created function
 
         :param student_data: list of dictionary rows to be filled with input data
 
@@ -256,23 +250,17 @@ class IO:
         """
 
         try:
-            student_first_name = input("Enter the student's first name: ")
-            if not student_first_name.isalpha():
-                raise ValueError("The last name should not contain numbers.")
-            student_last_name = input("Enter the student's last name: ")
-            if not student_last_name.isalpha():
-                raise ValueError("The last name should not contain numbers.")
-            course_name = input("Please enter the name of the course: ")
-            student = {"FirstName": student_first_name,
-                       "LastName": student_last_name,
-                       "CourseName": course_name}
+            # Input the data
+            student = Student()
+            student.first_name = input("What is the student's First name? ")
+            student.last_name = input("What is the student's Last name? ")
+            student.course_name = str(input("What is the Course Name? "))
             student_data.append(student)
-            print()
-            print(f"You have registered {student_first_name} {student_last_name} for {course_name}.")
+
         except ValueError as e:
-            IO.output_error_messages(message="One of the values was the correct type of data!", error=e)
+            IO.output_error_messages("That value is not the correct type of data!", e)
         except Exception as e:
-            IO.output_error_messages(message="Error: There was a problem with your entered data.", error=e)
+            IO.output_error_messages("There was a non-specific error!", e)
         return student_data
 
 
@@ -297,7 +285,7 @@ while (True):
 
     # Present the current data
     elif menu_choice == "2":
-        IO.output_student_and_course_names(students)
+        IO.output_student_and_course_names(student_data=students)
         continue
 
     # Save the data to a file

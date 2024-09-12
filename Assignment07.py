@@ -20,70 +20,81 @@ MENU: str = '''
 FILE_NAME: str = "Enrollments.json"
 
 # Define the Data Variables
-students: list = []  # a table of student data
 menu_choice: str = ""  # Hold the choice made by the user.
+students: list = []  # a table of student data
 
-
-# TODO Create a Person Class
+# Person Class
 class Person:
     """
     A collection of data about a Person
     Properties:
-    - first_name (str): The person's first name.
-    - last_name (str): The person's last name.
+    - student_first_name (str): The person's first name.
+    - student_last_name (str): The person's last name.
+        ChangeLog: (Who, When, What)
+    David Levinson,9/9/2024, Created Class
     """
 
+    # - - Constructor for the Person class with first and last name properties
     def __init__(self, first_name: str = "", last_name: str = ""):
         self.first_name = first_name
         self.last_name = last_name
 
+    # - - Getter for Student First Name property
     @property
-    def first_name(self):
+    def student_first_name(self):
         return self.__first_name.title()
 
-    @first_name.setter
-    def first_name(self, value: str):
+    # - - Setter for Student First Name property
+    @student_first_name.setter
+    def student_first_name(self, value: str):
         if value.isalpha() or value == "":
             self.__first_name = value
         else:
             raise ValueError("The first name should not contain numbers.")
 
+    # - - Getter for Student Last Name property
     @property
-    def last_name(self):
+    def student_last_name(self):
         return self.__last_name.title()
 
-    @last_name.setter
-    def last_name(self, value: str):
+    # - - Setter for Student Last Name property
+    @student_last_name.setter
+    def student_last_name(self, value: str):
         if value.isalpha() or value == "":
             self.__last_name = value
         else:
             raise ValueError("The last name should not contain numbers.")
 
+    # -  - Override the __str__() method to return Person data
     def __str__(self):
         return f'{self.first_name}, {self.last_name}'
 
-
+# Student Class
 class Student(Person):
     """
     A collection of data about a Student
     Properties:
-    - first_name (str): The student's first name inherited from the Person class
-    - last_name (str): The student's last name inherited from the Person class
+    - student_first_name (str): The student's first name inherited from the Person class
+    - student_last_name (str): The student's last name inherited from the Person class
     - course_name (str): The course the student is registering/registered for
+        ChangeLog: (Who, When, What)
+    David Levinson,9/9/2024, Created Class
     """
-
+    # Call to the person constructor and pass it the first name and last name data plus course name
     def __init__(self, first_name: str = '', last_name: str = '', course_name: str = ''):
         super().__init__(first_name=first_name, last_name=last_name)
         self.__course_name = course_name  # Initialize the private variable
 
+    # - - Getter for Course Name property
     @property
     def course_name(self):
         return self.__course_name.title()  # Getter with formatting
 
+    # - - Setter for Course Name property
     @course_name.setter
     def course_name(self, value: str):
         self.__course_name = value
-
+    #Override the __str__() method to return the student data
     def __str__(self):
         return f"{self.first_name}, {self.last_name}, {self.course_name}"
 
@@ -112,7 +123,6 @@ class FileProcessor:
 
         try:
             file = open(file_name, "r")
-
             list_of_dictionary_data = json.load(file)  # the load function returns a list of dictionary rows.
             for student in list_of_dictionary_data:
                 student_object: Student = Student(first_name=student["FirstName"],
@@ -221,7 +231,7 @@ class IO:
         return choice
 
     @staticmethod
-    def output_student_and_course_names(student_data: list):
+    def output_student_courses(student_data: list):
         """ This function displays the student and course names to the user
 
         ChangeLog: (Who, When, What)
@@ -256,6 +266,7 @@ class IO:
             student.last_name = input("What is the student's Last name? ")
             student.course_name = str(input("What is the Course Name? "))
             student_data.append(student)
+            print(f"You have registered {student.first_name} {student.last_name} for {student.course_name}")
 
         except ValueError as e:
             IO.output_error_messages("That value is not the correct type of data!", e)
@@ -285,7 +296,7 @@ while (True):
 
     # Present the current data
     elif menu_choice == "2":
-        IO.output_student_and_course_names(student_data=students)
+        IO.output_student_courses(student_data=students)
         continue
 
     # Save the data to a file
